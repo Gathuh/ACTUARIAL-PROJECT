@@ -1,3 +1,20 @@
+---
+title: "RESEARCH PROJECT"
+author: "GATHU MACHARIA"
+date: "2024-05-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r libraries}
+```
+
+```{r}
 setwd("Data")
 
 ##############
@@ -92,3 +109,23 @@ data_df_up <- do.call(rbind, lapply(data_list_logreturn_x, function(df1) {
   filtered_df <- dplyr::filter(df1, Date == Date_up)
   return(filtered_df)
 }))
+
+```
+
+In our data we want to include both inflation and exchange rates. We will include exchange rates by $merge()$ by `Date_up`. the reason for that is that we want to know by the date the market was rebounding uder what economic conditions was the company experiencing. To read this we don't need any special function we just do it with $read_csv()$.
+
+```{r}
+inflation=readr::read_csv("Data/Inflation rates/Inflation Rates.csv")
+exchange_rate=readr::read_csv("Data/exchange rates/Key CBK Indicative Exchange Rates (1).csv")
+inflation=inflation %>% mutate(Date=as.Date(paste0(Year,"-",Month,"-01"),format="%Y-%b-%d")) %>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = "%d/%m/%d") )%>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+```
+
+Merging the Data with the date that the stock prices of each company rebound to nomalcy
+
+```{r}
+data=data_df_up %>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) ) %>% 
+  left_join(exchange_rate,by="year_month")
+
+```
+
