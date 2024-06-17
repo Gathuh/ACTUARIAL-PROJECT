@@ -118,14 +118,23 @@ In our data we want to include both inflation and exchange rates. We will includ
 inflation=readr::read_csv("Data/Inflation rates/Inflation Rates.csv")
 exchange_rate=readr::read_csv("Data/exchange rates/Key CBK Indicative Exchange Rates (1).csv")
 inflation=inflation %>% mutate(Date=as.Date(paste0(Year,"-",Month,"-01"),format="%Y-%b-%d")) %>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
-exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = "%d/%m/%d") )%>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = "%d/%m/%Y") )%>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+
+exchange_rate_rb <- exchange_rate %>% group_by(year_month) %>% summarise(exchange_rate=mean(Mean))
 ```
 
 Merging the Data with the date that the stock prices of each company rebound to nomalcy
 
 ```{r}
 data=data_df_up %>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) ) %>% 
-  left_join(exchange_rate,by="year_month")
+  left_join(inflation %>% select(year_month, `Annual Average Inflation`, `12-Month Inflation`), by = "year_month") %>% left_join(exchange_rate_rb,by="year_month")
 
+```
+
+
+
+
+```{r}
+readr::read_csv("Data/interest rates/1852585567_Central Bank Rates.csv")
 ```
 

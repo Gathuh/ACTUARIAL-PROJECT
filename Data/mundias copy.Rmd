@@ -1,0 +1,131 @@
+---
+title: "backup"
+author: "GATHU MACHARIA"
+date: "2024-06-15"
+output: html_document
+---
+
+```{r}
+setwd("Data")
+
+##############
+library(dplyr)
+###############
+
+
+csv_files <- list.files(pattern = "*.csv")
+data_list <- lapply(csv_files, read.csv)
+# Extract company name from file names
+company_names <- gsub("^HistoricalPrices \\(5\\)", "", gsub(".csv", "", csv_files))
+
+# Add company column to each dataframe in the list
+for (i in seq_along(data_list)) {
+  data_list[[i]]$company <- company_names[i]
+}
+data_list <- lapply(data_list, function(df) {
+  df$Date <- as.Date(df$Date,format="%m/%d/%y")
+  return(df)
+})
+
+
+data_list_logreturn <- lapply(data_list, function(df) {
+  df %>% 
+    arrange(Date) %>% 
+    mutate(Log_Return = c( diff(log(Close)),NA))%>%.[-nrow(.),]%>%.[, c(1,5,7,8)]%>%
+    filter(Date<"2010-12-31" & Date>"2008-01-01")
+})
+```
+
+
+```{r}
+new_data <- lapply(data_list_logreturn, function(df) {
+  index1 <- which(df$Log_Return <= -0.05)[1]
+  index2 <- which(df$Log_Return >= 0.05)[1]
+  
+  if (is.na(index1)) {
+    Datedown <- "nodatedown"
+    event <- NA
+    Dateup="No"
+  } else {
+    Datedown <- df$Date[index1]
+    
+    if (is.na(index2)) {
+      Dateup <- tail(df$Date,1)
+      event <- 0
+    } else if (index2>=index1){
+      Dateup <- df$Date[index2]
+      event <- 1
+    }
+  }
+  
+  Duration <- ifelse(is.na(event), NA, as.numeric(Dateup) - as.numeric(Datedown))
+  
+  return(list(Datedown = Datedown,Duration = Duration, event = event,Dateup ))
+})
+
+
+```
+
+```{r}
+new_data <- lapply(data_list_logreturn, function(df) {
+  index1 <- which(df$Log_Return <= -0.05)[1]
+  index2 <- which(df$Log_Return >= 0.05)[1]
+  company=df$company[1]
+  
+  
+  if (is.na(index1)) {
+    Datedown <- NA
+    event <- NA
+    Dateup <- NA
+    Duration <- NA
+  } else {
+    Datedown <- df$Date[index1]
+    
+    if (is.na(index2) || index2 < index1) {
+      Dateup <- tail(df$Date, 1)
+      event <- 0
+      Duration <- as.numeric(Dateup) - as.numeric(Datedown)
+    } else {
+      Dateup <- df$Date[index2]
+      event <- 1
+      Duration <- as.numeric(Dateup) - as.numeric(Datedown)
+    }
+  }
+  
+  return(list(company=company,Datedown = Datedown, Duration = Duration, event = event, Dateup = Dateup))
+})
+
+
+```
+
+```{r}
+new_data_df <- na.exclude(do.call(rbind, lapply(new_data, function(x) {
+  data.frame(
+    Datedown = x$Datedown,
+    Duration = x$Duration,
+    event = x$event,
+    Dateup = x$Dateup,
+    company = x$company,
+    stringsAsFactors = T
+  )
+})))
+
+```
+
+
+```{r}
+inflation=readr::read_csv("Data/Inflation rates/Inflation Rates.csv")
+exchange_rate=readr::read_csv("Data/exchange rates/Key CBK Indicative Exchange Rates (1).csv")
+inflation=inflation %>% mutate(Date=as.Date(paste0(Year,"-",Month,"-01"),format="%Y-%b-%d")) %>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = "%d/%m/%Y") )%>% mutate(year_month=paste0(lubridate::year(Date),"-",months(Date)) )
+
+exchange_rate_rb <- exchange_rate %>% group_by(year_month) %>% summarise(exchange_rate=mean(Mean))
+```
+
+```{r}
+data=new_data_df %>% mutate(year_month=paste0(lubridate::year(Dateup),"-",months(Dateup)) ) %>% 
+  left_join(inflation %>% select(year_month, `Annual Average Inflation`, `12-Month Inflation`), by = "year_month") %>% left_join(exchange_rate_rb,by="year_month")
+
+```
+
+
