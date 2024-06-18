@@ -129,11 +129,6 @@ exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = "%d/%m/%Y") )%
 exchange_rate_rb <- exchange_rate %>% group_by(year_month) %>% summarise(exchange_rate=mean(Mean))
 ```
 
-```{r}
-data=new_data_df %>% mutate(year_month=paste0(lubridate::year(Dateup),"-",months(Dateup)) ) %>% 
-  left_join(inflation %>% select(year_month, `Annual Average Inflation`, `12-Month Inflation`), by = "year_month") %>% left_join(exchange_rate_rb,by="year_month")
-
-```
 
 
 ```{r}
@@ -153,3 +148,14 @@ for (i in 1:nrow(interest_rates)) {
 
 ```
 
+```{r}
+interest_rates=interest_rates %>% mutate(Date=as.Date(paste0(YEAR,"-", MONTH ,"-01"),format="%Y-%b-%d"),year_month=paste0(lubridate::year(Date),"-",month.name[lubridate::month(Date)]))
+
+
+```
+
+```{r}
+data=new_data_df %>% mutate(year_month=paste0(lubridate::year(Dateup),"-",months(Dateup)) ) %>% 
+  left_join(inflation %>% select(year_month, `Annual Average Inflation`, `12-Month Inflation`), by = "year_month") %>% left_join(exchange_rate_rb,by="year_month") %>% left_join(interest_rates,by="year_month")
+
+```
