@@ -1,0 +1,36 @@
+# Load necessary library
+library(dplyr)
+
+# Assume 'df' is your data frame containing the stock price data and 'log_returns' is the column containing the log returns
+
+# Define a function to check if the event has occurred
+check_event <- function(x) {
+  # Find the index where the log return is below -0.05 (5% decrease)
+  start_index <- min(which(x < -0.05))
+  
+  # If there is no such index, return 0 (event did not occur)
+  if (is.na(start_index)) {
+    return(0)
+  }
+  
+  # Find the index where the log return is above 0.05 (5% increase)
+  end_index <- min(which(x > 0.05)[which(x > 0.05) > start_index])
+  
+  # If there is no such index, return 0 (event did not occur)
+  if (is.na(end_index)) {
+    return(0)
+  }
+  
+  # Return 1 (event occurred)
+  return(1)
+}
+vc<-lapply(data_list_logreturn, check_event)
+# Apply the function to each stock's log returns
+df <- df %>%
+  group_by(stock_id) %>%
+  mutate(event = check_event(log_returns)) %>%
+  ungroup()
+
+# If you want to filter out the censored observations (i.e., those with event = 0), you can do:
+df <- df %>%
+  filter(event == 1)

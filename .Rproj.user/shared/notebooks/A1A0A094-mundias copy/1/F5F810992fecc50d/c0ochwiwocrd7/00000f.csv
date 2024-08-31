@@ -1,0 +1,3 @@
+"0","data=new_data_df %>% mutate(year_month=paste0(lubridate::year(Dateup),""-"",months(Dateup)) ) %>% "
+"0","  left_join(inflation %>% select(year_month, `Annual Average Inflation`, `12-Month Inflation`), by = ""year_month"") %>% left_join(exchange_rate_rb,by=""year_month"") %>% left_join(interest_rates,by=""year_month"")"
+"0",""

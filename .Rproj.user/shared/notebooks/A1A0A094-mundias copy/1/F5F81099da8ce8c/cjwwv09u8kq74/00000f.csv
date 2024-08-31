@@ -1,0 +1,40 @@
+"0","data$`Central Bank Rate`=as.numeric(data$`Central Bank Rate`)"
+"0","data$`12-Month Inflation`=as.numeric(data$`12-Month Inflation`)"
+"0","data$`Annual Average Inflation`=as.numeric(data$`Annual Average Inflation`)"
+"0",""
+"0","exponential_model <- survreg(Surv(Duration, event) ~ exchange_rate + `Interbank Rate` + `Central Bank Rate` + `Annual Average Inflation`, data = data, dist = ""exponential"")"
+"0","library(flexsurv)"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"2","
+Attaching package: ‘flexsurv’
+
+"
+"2","The following objects are masked from ‘package:actuar’:
+
+    dllogis, pllogis, qllogis, rllogis
+
+"
+"0","gompertz_model <- flexsurvreg(Surv(Duration, event) ~ exchange_rate + `Interbank Rate` + `Central Bank Rate` + `Annual Average Inflation`, data = data, dist = ""gompertz"")"
+"0",""
+"0","weibul=survreg(Surv(Duration ,event)~exchange_rate+`Interbank Rate`+`Central Bank Rate`+`Annual Average Inflation`,data = data,dist = ""weibull"")"
+"0","lognormal=survreg(Surv(Duration ,event)~exchange_rate+`Interbank Rate`+`Central Bank Rate`+`Annual Average Inflation`,data = data,dist = ""lognormal"")"
+"0",""
+"0","loglogistic_model <- survreg(Surv(Duration, event) ~ exchange_rate + `Interbank Rate` + `Central Bank Rate` + `Annual Average Inflation`, data = data, dist = ""loglogistic"")"
+"0","gamma_model <- flexsurvreg(Surv(Duration, event) ~ exchange_rate + `Interbank Rate` + `Central Bank Rate` + `Annual Average Inflation`, data = data, dist = ""gamma"")"
+"0",""
+"0",""
+"0","aicc <- function(aic, k, n) {"
+"0","  return(aic + (2 * k * (k + 1)) / (n - k - 1))"
+"0","}"
+"0",""
+"0","results <- data.frame("
+"0","  Model = c(""Weibull"", ""Lognormal"", ""Exponential"", ""Gompertz"", ""Loglogistic"", ""Gamma""),"
+"0","  AIC = c(AIC(weibul), AIC(lognormal), AIC(exponential_model), AIC(gompertz_model), AIC(loglogistic_model), AIC(gamma_model)),"
+"0","  BIC = c(BIC(weibul), BIC(lognormal), BIC(exponential_model), BIC(gompertz_model), BIC(loglogistic_model), BIC(gamma_model))"
+"0","  "
+"0",")"
+"0",""
+"0",""

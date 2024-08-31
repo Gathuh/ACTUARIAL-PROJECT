@@ -1,0 +1,22 @@
+"0","inflation=readr::read_csv(""Data/Inflation rates/Inflation Rates.csv"")"
+"2","[1mRows: [22m[34m233[39m [1mColumns: [22m[34m4[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m─────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (1): Month
+[32mdbl[39m (3): Year, Annual Average Inflation, 12-Month Inflation"
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","exchange_rate=readr::read_csv(""Data/exchange rates/Key CBK Indicative Exchange Rates (1).csv"")"
+"2","[1mRows: [22m[34m4270[39m [1mColumns: [22m[34m5[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m─────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (2): Date, Currency
+[32mdbl[39m (3): Mean, Buy, Sell"
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","inflation=inflation %>% mutate(Date=as.Date(paste0(Year,""-"",Month,""-01""),format=""%Y-%b-%d"")) %>% mutate(year_month=paste0(lubridate::year(Date),""-"",months(Date)) )"
+"0","exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = ""%d/%m/%Y"") )%>% mutate(year_month=paste0(lubridate::year(Date),""-"",months(Date)) )"
+"0",""
+"0","exchange_rate_rb <- exchange_rate %>% group_by(year_month) %>% summarise(exchange_rate=mean(Mean))"

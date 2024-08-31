@@ -1,0 +1,6 @@
+"0","inflation=readr::read_csv(""Data/Inflation rates/Inflation Rates.csv"")"
+"0","exchange_rate=readr::read_csv(""Data/exchange rates/Key CBK Indicative Exchange Rates (1).csv"")"
+"0","inflation=inflation %>% mutate(Date=as.Date(paste0(Year,""-"",Month,""-01""),format=""%Y-%b-%d"")) %>% mutate(year_month=paste0(lubridate::year(Date),""-"",months(Date)) )"
+"0","exchange_rate=exchange_rate %>% mutate(Date=as.Date(Date,format = ""%d/%m/%Y"") )%>% mutate(year_month=paste0(lubridate::year(Date),""-"",months(Date)) )"
+"0",""
+"0","exchange_rate_rb <- exchange_rate %>% group_by(year_month) %>% summarise(exchange_rate=mean(Mean))"
